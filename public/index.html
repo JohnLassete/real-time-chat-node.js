@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real-Time Chat App</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="chat-container">
+    <h1>Real-Time Chat Room</h1>
+    <div id="messages"></div>
+    <input id="username" type="text" placeholder="Enter username" />
+    <input id="message-input" type="text" placeholder="Type a message..." />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    
+    // Set up message reception
+    socket.on('allMessages', (allMessages) => {
+      const messagesDiv = document.getElementById('messages');
+      messagesDiv.innerHTML = ''; // Clear previous messages
+      allMessages.forEach(msg => {
+        displayMessage(msg);
+      });
+    });
+
+    socket.on('chat message', (msg) => {
+      displayMessage(msg);
+    });
+
+    function sendMessage() {
+      const username = document.getElementById('username').value.trim();
+      const message = document.getElementById('message-input').value.trim();
+
+      if (username && message) {
+        socket.emit('chat message', { username, text: message });
+        document.getElementById('message-input').value = '';
+      } else {
+        alert("Please enter a username and a message.");
+      }
+    }
+
+    function displayMessage(msg) {
+      const messagesDiv = document.getElementById('messages');
+      const messageElement = document.createElement('div');
+      messageElement.textContent = `${msg.username}: ${msg.text}`;
+      messagesDiv.appendChild(messageElement);
+    }
+  </script>
+</body>
+</html>
